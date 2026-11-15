@@ -1,0 +1,1 @@
+-- No financial demo records are inserted. Each new user starts with an empty account.

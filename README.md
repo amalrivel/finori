@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Finori
 
-## Getting Started
+Aplikasi pencatatan keuangan menggunakan Next.js, shadcn, dan Supabase lokal.
 
-First, run the development server:
+## Menjalankan aplikasi
 
 ```bash
+npm ci
+npx supabase start
+npx supabase migration up
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Salin `.env.example` ke `.env.local` jika belum tersedia. Ambil **API_URL** dan **PUBLISHABLE_KEY** dari `npx supabase status`. URL aplikasi menggunakan `http://127.0.0.1:54321`, bukan URL koneksi PostgreSQL pada port 54322. Jangan masukkan secret key atau service-role key ke environment `NEXT_PUBLIC_*`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Buka [localhost:3000](http://localhost:3000), pilih **Daftar akun**, lalu masuk dengan email dan password. Konfigurasi lokal saat ini tidak mewajibkan konfirmasi email. Setiap pengguna mulai dengan daftar rekening kosong. Tambahkan rekening/dompet sebelum mencatat transaksi.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Akses cepat saat development
 
-## Learn More
+Aplikasi ditujukan untuk penggunaan pribadi. Siapkan akun testing lokal sekali:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run dev:account
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`npm run dev` hanya mendengarkan koneksi loopback `127.0.0.1`, sehingga tidak dibagikan ke jaringan lokal.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Tombol **Masuk akun testing** muncul pada halaman login selama `next dev`. Akun ini menyimpan data testing tersendiri. Password acak disimpan pada `.env.local` sebagai `DEV_TEST_PASSWORD`, bukan variable publik atau kode frontend. Menjalankan ulang perintah setup memakai akun yang sama tanpa menghapus atau mereset datanya.
 
-## Deploy on Vercel
+Pada `next build` / `next start`, tombol tidak ditampilkan dan endpoint akses testing mengembalikan 404. Akses cepat juga ditolak jika aplikasi atau Supabase menggunakan host selain loopback lokal. Untuk data pribadi, gunakan login email/password biasa.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Data
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Rekening, saldo awal, transaksi, rincian barang, serta diskon tersimpan di database.
+- Row Level Security membatasi akses berdasarkan pengguna yang sedang masuk.
+- Rekening bertransaksi tidak dapat dihapus, termasuk lewat API langsung.
+- Impor JSON disimpan sekaligus: jika satu transaksi ditolak database, seluruh batch gagal.
+- Rekening dan transaksi baru tampil setelah database mengonfirmasi penyimpanan. Jika terjadi kegagalan, isian dipertahankan dan pesan kesalahan ditampilkan.
+- Memuat ulang halaman atau masuk dari browser lain dengan akun yang sama memuat data yang sudah tersimpan.
+- Halaman Ringkasan menampilkan angka utama, satu grafik arus kas, dan lima transaksi terakhir. Halaman `/analytics` menampung analisis lengkap, pencarian, dan ekspor CSV. Keduanya mendukung filter bulan/mata uang dan memakai data tersimpan.
+
+Skema yang dapat direproduksi berada di `supabase/migrations/`. Tidak perlu mereset database untuk menjalankan aplikasi.
+
+## Mata uang
+
+Pilih **IDR**, **JPY**, atau **USD** saat menambah rekening/dompet. Gunakan rekening terpisah untuk setiap mata uang. Transaksi, rincian barang, dan diskon mengikuti mata uang rekening: IDR/JPY berupa angka utuh, USD maksimal 2 desimal (input `12.50`). Mata uang rekening yang sudah memiliki transaksi tidak dapat diubah, termasuk lewat API.
+
+Dashboard memiliki pilihan mata uang untuk ringkasan, grafik, dan daftar transaksi. Daftar rekening menampilkan total terpisah per mata uang; saldo berlainan mata uang tidak dijumlahkan. Belum ada konversi kurs atau transfer valas otomatis. Dashboard tidak mengubah kategori transaksi lama secara otomatis.
+
+Impor JSON boleh mencampur rekening dari berbagai mata uang dalam satu batch. `currency` opsional dan harus sama dengan mata uang `accountId`; nominal selalu dalam mata uang rekening tersebut. Ekspor CSV menyertakan mata uang dan rekening. Data sebelum migrasi tetap IDR dengan nominal yang sama.
+
+## Pemeriksaan
+
+```bash
+npm run lint
+npx tsc --noEmit
+node --test --test-isolation=none src/lib/finance.test.ts src/lib/form-schemas.test.ts src/lib/multicurrency.test.ts src/lib/dashboard.test.ts
+npm run test:db
+npm run test:dev-login
+npm run build
+```
+
+`test:db` hanya berjalan untuk alamat Supabase lokal. Tes membuat dua pengguna sementara, memeriksa CRUD, penyimpanan rincian, isolasi antar pengguna, larangan hapus rekening bertransaksi, dan rollback impor. Pengguna serta data tes dibersihkan setelah selesai. Secret lokal hanya dibaca oleh skrip tes dari CLI, tidak dikirim ke browser.
+
+## Tema dan tampilan
+
+Panduan token warna, mode terang/gelap, dan penyesuaian Dialog berada di [docs/theme.md](docs/theme.md). Sumber warna aplikasi tetap di `src/app/globals.css`.
+
+Perhitungan dashboard dan aturan grafik dijelaskan di [docs/dashboard.md](docs/dashboard.md).
+
+## Format kode
+
+```bash
+npm run format        # Format source, konfigurasi, dan dokumentasi
+npm run format:check  # Periksa format tanpa mengubah file
+npm run lint          # Periksa kualitas kode dengan ESLint
+```
+
+Prettier memakai `.prettierrc`. Plugin `prettier-plugin-tailwindcss` mengurutkan utility pada `className`, `cn()`, dan `cva()`. Untuk Tailwind v4, plugin membaca token tema dari `src/app/globals.css` melalui `tailwindStylesheet`. Jika menambah plugin Prettier lain, pertahankan plugin Tailwind di urutan terakhir.
+
+`eslint-config-prettier/flat` diletakkan setelah konfigurasi Next.js/TypeScript di `eslint.config.mjs` untuk mematikan aturan format yang bertabrakan. ESLint tetap memeriksa kualitas kode; formatting dijalankan oleh Prettier.
+
+`.prettierignore` mengecualikan build, lockfile hasil generator, kredensial, tooling lokal, dan graphify. Untuk format saat menyimpan di editor, pilih ekstensi Prettier (`esbenp.prettier-vscode`) sebagai formatter dan aktifkan format on save; konfigurasi proyek ini akan dipakai otomatis.

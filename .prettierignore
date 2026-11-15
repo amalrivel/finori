@@ -1,0 +1,22 @@
+# Dependencies and generated output
+node_modules/
+.next/
+out/
+build/
+coverage/
+.vercel/
+next-env.d.ts
+*.tsbuildinfo
+package-lock.json
+
+# Local credentials, tooling, and generated knowledge graph
+.env*
+*.pem
+.aws/
+.agents/
+.codex/
+graphify-out/
+AGENTS.md
+skills-lock.json
+supabase/.temp/
+supabase/.branches/

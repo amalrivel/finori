@@ -1,0 +1,96 @@
+{
+  "nodes": [
+    {
+      "id": "_agents_skills_shadcn_assets_shadcn_shadcn_logo",
+      "label": "shadcn logo",
+      "file_type": "image",
+      "source_file": "/home/amalrivel/Documents/Projects/finori/.agents/skills/shadcn/assets/shadcn.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "_agents_skills_shadcn_assets_shadcn_small_shadcn_small_logo",
+      "label": "shadcn small logo",
+      "file_type": "image",
+      "source_file": "/home/amalrivel/Documents/Projects/finori/.agents/skills/shadcn/assets/shadcn-small.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "public_file_file_icon",
+      "label": "File icon",
+      "file_type": "image",
+      "source_file": "/home/amalrivel/Documents/Projects/finori/public/file.svg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "public_globe_globe_icon",
+      "label": "Globe icon",
+      "file_type": "image",
+      "source_file": "/home/amalrivel/Documents/Projects/finori/public/globe.svg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "public_next_next_js_wordmark",
+      "label": "Next.js wordmark",
+      "file_type": "image",
+      "source_file": "/home/amalrivel/Documents/Projects/finori/public/next.svg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "public_vercel_vercel_triangle_logo",
+      "label": "Vercel triangle logo",
+      "file_type": "image",
+      "source_file": "/home/amalrivel/Documents/Projects/finori/public/vercel.svg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "public_window_browser_window_icon",
+      "label": "Browser window icon",
+      "file_type": "image",
+      "source_file": "/home/amalrivel/Documents/Projects/finori/public/window.svg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "_agents_skills_shadcn_assets_shadcn_shadcn_logo",
+      "target": "_agents_skills_shadcn_assets_shadcn_small_shadcn_small_logo",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/amalrivel/Documents/Projects/finori/.agents/skills/shadcn/assets/shadcn.png",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
