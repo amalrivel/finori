@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useFinance } from "@/components/finance-provider";
 import { DashboardCharts } from "@/components/dashboard-charts";
-import { PurchaseDetailsView } from "@/components/purchase-items";
+import { TransactionDetails } from "@/components/transaction-details";
 import { formatMoney, type Currency } from "@/lib/currency";
 import { buildDashboard } from "@/lib/dashboard";
 import { Button } from "@/components/ui/button";
@@ -210,7 +210,7 @@ export function Analytics() {
               </CardAction>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-semibold tracking-tight break-words tabular-nums">
+              <p className="text-2xl font-semibold tracking-tight wrap-break-word tabular-nums">
                 {money(item.value)}
               </p>
               <p className="mt-3 text-xs leading-5 text-muted-foreground">
@@ -429,7 +429,7 @@ export function Analytics() {
                       }
                     </p>
                     {!hidden && (
-                      <PurchaseDetailsView transaction={transaction} />
+                      <TransactionDetails transaction={transaction} />
                     )}
                   </TableCell>
                   <TableCell className="whitespace-nowrap text-muted-foreground">

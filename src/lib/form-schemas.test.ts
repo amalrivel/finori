@@ -129,3 +129,51 @@ test("detailed transactions calculate discounts once and report errors at item f
     false,
   );
 });
+
+test("edit defaults preserve receipt fields and allow replacing or removing the details", async () => {
+  const { transactionFormDefaults } = await import("./form-schemas.ts");
+  const original = {
+    accountId: accounts[0].id,
+    currency: "IDR" as const,
+    name: "Belanja lama",
+    amount: -33000,
+    category: "Belanja",
+    date: "2026-08-05",
+    items: [
+      {
+        name: "Susu",
+        quantity: 2,
+        unitPrice: 20000,
+        discount: 5000,
+        kind: "Minuman",
+        group: "Dapur",
+      },
+    ],
+    discount: 2000,
+  };
+  const defaults = transactionFormDefaults("other", original);
+  assert.equal(defaults.amount, 33000);
+  assert.equal(defaults.detailed, true);
+  assert.deepEqual(
+    createTransactionFormSchema(accounts).parse(defaults),
+    original,
+  );
+  defaults.purchase.items[0].name = "Ubah nama barang";
+  assert.equal(original.items[0].name, "Susu");
+  const simple = createTransactionFormSchema(accounts).parse({
+    ...defaults,
+    detailed: false,
+    amount: "12000",
+  });
+  assert.equal(simple.amount, -12000);
+  assert.equal(simple.items, undefined);
+  const income = transactionFormDefaults("other", {
+    ...original,
+    amount: 1000,
+    category: "Gaji",
+    items: undefined,
+    discount: undefined,
+  });
+  assert.equal(income.type, "income");
+  assert.equal(income.detailed, false);
+});

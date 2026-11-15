@@ -82,3 +82,20 @@ Prettier memakai `.prettierrc`. Plugin `prettier-plugin-tailwindcss` mengurutkan
 `eslint-config-prettier/flat` diletakkan setelah konfigurasi Next.js/TypeScript di `eslint.config.mjs` untuk mematikan aturan format yang bertabrakan. ESLint tetap memeriksa kualitas kode; formatting dijalankan oleh Prettier.
 
 `.prettierignore` mengecualikan build, lockfile hasil generator, kredensial, tooling lokal, dan graphify. Untuk format saat menyimpan di editor, pilih ekstensi Prettier (`esbenp.prettier-vscode`) sebagai formatter dan aktifkan format on save; konfigurasi proyek ini akan dipakai otomatis.
+
+## Lampiran Google Drive dan CRUD transaksi
+
+Dari **Detail transaksi**, gunakan **Ubah transaksi / rincian** untuk mengedit atau **Hapus transaksi** untuk menghapus setelah konfirmasi. Lampiran JPEG/PNG/WebP maksimal 5 MB dapat ditambah, dilihat, diunduh, diubah namanya, dan dihapus melalui detail transaksi. Gambar disimpan privat di Google Drive; metadata dan seluruh data keuangan tetap di Supabase.
+
+Hubungkan akun melalui **Penyimpanan** (`/storage`). Setup Google Cloud, variabel privat, callback OAuth, dan batas integrasi dijelaskan di [docs/google-drive.md](docs/google-drive.md). Client ID/Secret pribadi belum diisi; tombol koneksi akan aktif setelah konfigurasi tersedia. Aplikasi memerlukan Node.js 22+.
+
+```bash
+npm test
+npm run test:db
+# Setelah npm run build, mulai server lokal pada port tes:
+npm run start -- --hostname 127.0.0.1 --port 3100
+# Terminal lain:
+npm run test:drive-api
+```
+
+Penghapusan transaksi dengan lampiran ditolak sampai lampiran dihapus terlebih dahulu. Menghapus lampiran memindahkan file ke sampah Drive; gambar tidak dihapus permanen melalui aplikasi.

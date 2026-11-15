@@ -1,5 +1,5 @@
 {
-  "0": "accounts/page.tsx",
+  "0": "Dashboard dari data tersimpan",
   "1": "sidebar.tsx",
   "2": "accordion",
   "3": "Styling & Customization",
@@ -13,9 +13,9 @@
   "11": "Component Composition",
   "12": "dropdown-menu (Radix `DropdownMenu` → Base UI `Menu`)",
   "13": "form",
-  "14": "FinanceProvider",
+  "14": "finance-provider.tsx",
   "15": "shadcn MCP Server",
-  "16": "field.tsx",
+  "16": "analytics.tsx",
   "17": "AGENTS",
   "18": "shadcn logo",
   "19": "openai",
@@ -50,15 +50,9 @@
   "48": "Radix UI -> Base UI migration",
   "49": "Consumer-side prop changes (call sites, not wrappers)",
   "50": "devDependencies",
-  "51": "app-sidebar.tsx",
   "52": "scripts",
   "53": "eslint.config.mjs",
   "54": "overlays.md",
   "55": "finance.ts",
-  "56": "separator",
-  "57": "sheet.tsx",
-  "58": "dashboard-header.tsx",
-  "59": "progress.tsx",
-  "60": "analytics/page.tsx",
-  "61": "next.config.ts"
+  "56": "separator"
 }

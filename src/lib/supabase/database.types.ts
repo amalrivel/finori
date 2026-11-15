@@ -11,8 +11,8 @@ export type Database = {
     Tables: {
       accounts: {
         Row: {
-          currency: string;
           created_at: string;
+          currency: string;
           description: string;
           id: string;
           kind: string;
@@ -22,8 +22,8 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
-          currency?: string;
           created_at?: string;
+          currency?: string;
           description?: string;
           id?: string;
           kind: string;
@@ -32,8 +32,8 @@ export type Database = {
           user_id?: string;
         };
         Update: {
-          currency?: string;
           created_at?: string;
+          currency?: string;
           description?: string;
           id?: string;
           kind?: string;
@@ -43,13 +43,86 @@ export type Database = {
         };
         Relationships: [];
       };
+      drive_connections: {
+        Row: {
+          connected_at: string;
+          folder_id: string | null;
+          google_user_id: string;
+          refresh_token: string | null;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          connected_at?: string;
+          folder_id?: string | null;
+          google_user_id: string;
+          refresh_token?: string | null;
+          user_id: string;
+        };
+        Update: {
+          connected_at?: string;
+          folder_id?: string | null;
+          google_user_id?: string;
+          refresh_token?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      transaction_attachments: {
+        Row: {
+          created_at: string;
+          drive_file_id: string;
+          google_user_id: string;
+          id: string;
+          mime_type: string;
+          name: string;
+          size: number;
+          slot: number;
+          transaction_id: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          drive_file_id: string;
+          google_user_id: string;
+          id?: string;
+          mime_type: string;
+          name: string;
+          size: number;
+          slot: number;
+          transaction_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          drive_file_id?: string;
+          google_user_id?: string;
+          id?: string;
+          mime_type?: string;
+          name?: string;
+          size?: number;
+          slot?: number;
+          transaction_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "transaction_attachments_transaction_id_user_id_fkey";
+            columns: ["transaction_id", "user_id"];
+            isOneToOne: false;
+            referencedRelation: "transactions";
+            referencedColumns: ["id", "user_id"];
+          },
+        ];
+      };
       transactions: {
         Row: {
           account_id: string;
           amount: number;
           category: string;
-          currency: string;
           created_at: string;
+          currency: string;
           date: string;
           discount: number;
           id: string;
@@ -62,8 +135,8 @@ export type Database = {
           account_id: string;
           amount: number;
           category: string;
-          currency?: string;
           created_at?: string;
+          currency?: string;
           date: string;
           discount?: number;
           id?: string;
@@ -75,8 +148,8 @@ export type Database = {
           account_id?: string;
           amount?: number;
           category?: string;
-          currency?: string;
           created_at?: string;
+          currency?: string;
           date?: string;
           discount?: number;
           id?: string;
@@ -102,9 +175,9 @@ export type Database = {
       finori_valid_purchase: {
         Args: {
           amount: number;
+          currency: string;
           discount: number;
           items: Json;
-          currency: string;
         };
         Returns: boolean;
       };

@@ -11,7 +11,7 @@ import {
   blankPurchaseItem,
   type TransactionFormInput,
 } from "@/lib/form-schemas";
-import { useState, type ChangeEvent } from "react";
+import { useId, useState, type ChangeEvent } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import {
   type TransactionDraft,
@@ -28,14 +28,6 @@ import {
   FieldError,
 } from "@/components/ui/field";
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import {
   Table,
   TableHeader,
@@ -98,6 +90,7 @@ const itemFields = [
 ] as const;
 
 export function PurchaseItemsEditor({ currency }: { currency: Currency }) {
+  const id = useId();
   const money = (value: number) => formatMoney(value, currency);
   const form = useFormContext<TransactionFormInput>();
   const { fields, append, remove, replace } = useFieldArray({
@@ -158,11 +151,11 @@ export function PurchaseItemsEditor({ currency }: { currency: Currency }) {
       </div>
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="purchase-upload">
+          <FieldLabel htmlFor={`${id}-purchase-upload`}>
             Unggah rincian JSON (opsional)
           </FieldLabel>
           <Input
-            id="purchase-upload"
+            id={`${id}-purchase-upload`}
             type="file"
             accept=".json,application/json"
             onChange={upload}
@@ -270,12 +263,12 @@ export function PurchaseItemsEditor({ currency }: { currency: Currency }) {
         control={form.control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="purchase-discount">
+            <FieldLabel htmlFor={`${id}-purchase-discount`}>
               Diskon seluruh belanja ({currency})
             </FieldLabel>
             <Input
               {...field}
-              id="purchase-discount"
+              id={`${id}-purchase-discount`}
               type="number"
               step={currencyStep(currency)}
               aria-invalid={fieldState.invalid}
@@ -291,7 +284,7 @@ export function PurchaseItemsEditor({ currency }: { currency: Currency }) {
   );
 }
 
-export function PurchaseDetailsView({
+export function PurchaseDetailsContent({
   transaction,
 }: {
   transaction: Pick<
@@ -302,57 +295,45 @@ export function PurchaseDetailsView({
   const money = (value: number) => formatMoney(value, transaction.currency);
   if (!transaction.items?.length) return null;
   return (
-    <Dialog>
-      <DialogTrigger render={<Button variant="ghost" size="xs" />}>
-        Lihat {transaction.items.length} barang
-      </DialogTrigger>
-      <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Rincian belanja</DialogTitle>
-          <DialogDescription>
-            Rincian ini bagian dari satu transaksi, bukan pengeluaran tambahan.
-          </DialogDescription>
-        </DialogHeader>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Barang</TableHead>
-              <TableHead>Harga / diskon</TableHead>
-              <TableHead className="text-right">Subtotal</TableHead>
+    <div className="flex min-w-0 flex-col gap-4">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Barang</TableHead>
+            <TableHead>Harga / diskon</TableHead>
+            <TableHead className="text-right">Subtotal</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {transaction.items.map((item, index) => (
+            <TableRow key={index}>
+              <TableCell>
+                <p className="wrap-break-word whitespace-normal">
+                  {item.name} × {item.quantity}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {`Jenis: ${item.kind || "Belum diisi"} · Kelompok: ${item.group || "Belum diisi"}`}
+                </p>
+              </TableCell>
+              <TableCell>
+                <p>{money(item.unitPrice)} / unit</p>
+                <p className="text-xs text-muted-foreground">
+                  Diskon barang {money(item.discount)}
+                </p>
+              </TableCell>
+              <TableCell className="text-right">
+                {money(purchaseItemTotal(item, transaction.currency))}
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {transaction.items.map((item, index) => (
-              <TableRow key={index}>
-                <TableCell>
-                  <p>
-                    {item.name} × {item.quantity}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {[item.kind, item.group].filter(Boolean).join(" · ") ||
-                      "Tanpa jenis / kelompok"}
-                  </p>
-                </TableCell>
-                <TableCell>
-                  <p>{money(item.unitPrice)} / unit</p>
-                  <p className="text-xs text-muted-foreground">
-                    Diskon {money(item.discount)}
-                  </p>
-                </TableCell>
-                <TableCell className="text-right">
-                  {money(purchaseItemTotal(item, transaction.currency))}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <p className="text-sm">
-          Diskon seluruh belanja: {money(transaction.discount ?? 0)}
-        </p>
-        <p className="font-medium">
-          Total dibayar: {money(Math.abs(transaction.amount))}
-        </p>
-      </DialogContent>
-    </Dialog>
+          ))}
+        </TableBody>
+      </Table>
+      <p className="text-sm">
+        Diskon seluruh belanja: {money(transaction.discount ?? 0)}
+      </p>
+      <p className="font-medium">
+        Total dibayar: {money(Math.abs(transaction.amount))}
+      </p>
+    </div>
   );
 }

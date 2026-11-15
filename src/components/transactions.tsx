@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { TransactionForm } from "@/components/transaction-form";
-import { PurchaseDetailsView } from "@/components/purchase-items";
+import { TransactionDetails } from "@/components/transaction-details";
 import { TransactionJsonImport } from "@/components/transaction-json-import";
 import { useFinance } from "@/components/finance-provider";
 import { formatMoney } from "@/lib/currency";
@@ -103,7 +103,7 @@ export function Transactions() {
                             </span>
                             <div>
                               <p className="font-medium">{transaction.name}</p>
-                              <PurchaseDetailsView transaction={transaction} />
+                              <TransactionDetails transaction={transaction} />
                               <p className="mt-1 text-xs text-muted-foreground">
                                 {transaction.category} ·{" "}
                                 {new Date(

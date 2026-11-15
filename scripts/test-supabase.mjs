@@ -257,13 +257,149 @@ try {
     .single();
   assert.equal(roundTrip.data.currency, "USD");
   assert.equal(roundTrip.data.items[0].unitPrice, 1.75);
+  const transactionId = saved.data.id;
+  const updateOwn = await clients[0]
+    .from("transactions")
+    .update({ name: "Edited receipt" })
+    .eq("id", transactionId)
+    .select()
+    .single();
+  assert.equal(updateOwn.error, null, updateOwn.error?.message);
+  assert.equal(updateOwn.data.items[0].name, "Susu");
+  const updateOther = await clients[1]
+    .from("transactions")
+    .update({ name: "Forbidden" })
+    .eq("id", transactionId)
+    .select();
+  assert.deepEqual(updateOther.data, []);
+  const changeOwner = await clients[0]
+    .from("transactions")
+    .update({ user_id: users[1].id })
+    .eq("id", transactionId);
+  assert.ok(changeOwner.error);
+  const badEdit = await clients[0]
+    .from("transactions")
+    .update({ amount: -1 })
+    .eq("id", transactionId);
+  assert.ok(badEdit.error);
+  const attachment = await admin
+    .from("transaction_attachments")
+    .insert({
+      user_id: users[0].id,
+      transaction_id: transactionId,
+      drive_file_id: `fake-${run}`,
+      google_user_id: "google-test-account",
+      slot: 1,
+      name: "receipt.png",
+      mime_type: "image/png",
+      size: 100,
+    })
+    .select()
+    .single();
+  assert.equal(attachment.error, null, attachment.error?.message);
+  const readOwn = await clients[0]
+    .from("transaction_attachments")
+    .select()
+    .eq("id", attachment.data.id);
+  assert.equal(readOwn.data.length, 1);
+  assert.deepEqual(
+    (
+      await clients[1]
+        .from("transaction_attachments")
+        .select()
+        .eq("id", attachment.data.id)
+    ).data,
+    [],
+  );
+  assert.ok(
+    (
+      await clients[0]
+        .from("transaction_attachments")
+        .update({ drive_file_id: "injected" })
+        .eq("id", attachment.data.id)
+    ).error,
+  );
+  assert.ok(
+    (
+      await clients[0]
+        .from("transaction_attachments")
+        .delete()
+        .eq("id", attachment.data.id)
+    ).error,
+  );
+  const cannotDelete = await clients[0]
+    .from("transactions")
+    .delete()
+    .eq("id", transactionId);
+  assert.equal(cannotDelete.error?.code, "23503");
+  const badAttachment = await admin.from("transaction_attachments").insert({
+    ...attachment.data,
+    id: randomUUID(),
+    slot: 11,
+    drive_file_id: `invalid-${run}`,
+  });
+  assert.ok(badAttachment.error);
+  const crossAttachment = await admin.from("transaction_attachments").insert({
+    ...attachment.data,
+    id: randomUUID(),
+    user_id: users[1].id,
+    slot: 2,
+    drive_file_id: `cross-${run}`,
+  });
+  assert.ok(crossAttachment.error);
+  const connection = await admin.from("drive_connections").upsert({
+    user_id: users[0].id,
+    google_user_id: "test-account",
+    refresh_token: "encrypted-fixture",
+  });
+  assert.equal(connection.error, null, connection.error?.message);
+  assert.ok((await clients[0].from("drive_connections").select()).error);
+  assert.ok((await clients[1].from("drive_connections").select()).error);
+  const removeMetadata = await admin
+    .from("transaction_attachments")
+    .delete()
+    .eq("id", attachment.data.id);
+  assert.equal(removeMetadata.error, null);
+  const deletable = await clients[0]
+    .from("transactions")
+    .insert({ ...row, amount: -100, items: null, discount: 0 })
+    .select()
+    .single();
+  assert.equal(deletable.error, null, deletable.error?.message);
+  assert.deepEqual(
+    (
+      await clients[1]
+        .from("transactions")
+        .delete()
+        .eq("id", deletable.data.id)
+        .select()
+    ).data,
+    [],
+  );
+  const removed = await clients[0]
+    .from("transactions")
+    .delete()
+    .eq("id", deletable.data.id)
+    .select();
+  assert.equal(removed.error, null);
+  assert.equal(removed.data.length, 1);
   const unauthenticated = await client().from("accounts").select();
   assert.ok(unauthenticated.error);
   console.log(
-    "PASS: signup/login, account CRUD, receipt persistence after re-login, per-user RLS, protected deletion, atomic batch imports, multi-currency precision, receipt rounding, and currency locks.",
+    "PASS: signup/login, account CRUD, receipt persistence after re-login, per-user RLS, protected deletion, atomic batch imports, multi-currency precision, receipt rounding, currency locks, transaction CRUD, attachment ownership, and protected Drive credentials.",
   );
 } finally {
   for (const user of users) {
+    const attachments = await admin
+      .from("transaction_attachments")
+      .delete()
+      .eq("user_id", user.id);
+    assert.equal(attachments.error, null);
+    const connections = await admin
+      .from("drive_connections")
+      .delete()
+      .eq("user_id", user.id);
+    assert.equal(connections.error, null);
     const tx = await admin.from("transactions").delete().eq("user_id", user.id);
     assert.equal(tx.error, null);
     const accounts = await admin

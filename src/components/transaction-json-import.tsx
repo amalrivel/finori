@@ -6,7 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { importFormSchema } from "@/lib/form-schemas";
 import { Braces, Copy, CheckCircle2 } from "lucide-react";
-import { PurchaseDetailsView } from "@/components/purchase-items";
+import { TransactionDetails } from "@/components/transaction-details";
 import { useFinance } from "@/components/finance-provider";
 import {
   transactionCategories,
@@ -310,7 +310,7 @@ export function TransactionJsonImport() {
                     <TableRow key={index}>
                       <TableCell>
                         <p>{transaction.name}</p>
-                        <PurchaseDetailsView transaction={transaction} />
+                        <TransactionDetails transaction={transaction} />
                         <p className="text-xs text-muted-foreground">
                           {transaction.date}
                         </p>

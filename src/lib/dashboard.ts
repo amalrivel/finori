@@ -6,7 +6,10 @@ import {
   type TransactionDraft,
 } from "./finance.ts";
 
-export type DashboardTransaction = TransactionDraft & { id: string };
+export type DashboardTransaction = TransactionDraft & {
+  id: string;
+  createdAt?: string;
+};
 export function buildDashboard(
   accounts: readonly Account[],
   transactions: readonly DashboardTransaction[],

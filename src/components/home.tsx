@@ -12,6 +12,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { useFinance } from "@/components/finance-provider";
+import { TransactionDetails } from "@/components/transaction-details";
 import { DashboardCharts } from "@/components/dashboard-charts";
 import { DashboardFilters } from "@/components/dashboard-filters";
 import { formatMoney, type Currency } from "@/lib/currency";
@@ -144,7 +145,7 @@ export function Home() {
               </CardAction>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-semibold tracking-tight break-words tabular-nums">
+              <p className="text-2xl font-semibold tracking-tight wrap-break-word tabular-nums">
                 {money(item.value)}
               </p>
               <p className="mt-2 text-xs text-muted-foreground">{item.note}</p>
@@ -184,6 +185,11 @@ export function Home() {
                       <p className="mt-1 text-xs text-muted-foreground">
                         {dateLabel(transaction.date)}
                       </p>
+                      {!hidden && (
+                        <div className="mt-2">
+                          <TransactionDetails transaction={transaction} />
+                        </div>
+                      )}
                     </div>
                     <p className="shrink-0 text-sm font-medium tabular-nums">
                       {!hidden && (transaction.amount > 0 ? "+" : "−")}

@@ -23,8 +23,9 @@ export const accountToRow = (account: Account, userId: string) => ({
 });
 export const transactionFromRow = (
   row: TransactionRow,
-): TransactionDraft & { id: string } => ({
+): TransactionDraft & { id: string; createdAt: string } => ({
   id: row.id,
+  createdAt: row.created_at,
   accountId: row.account_id,
   currency: row.currency as Account["currency"],
   name: row.name,

@@ -1,7 +1,7 @@
 "use client";
 
 import { currencyStep, formatMoney, sumMoney } from "@/lib/currency";
-import { useState } from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +9,7 @@ import { ArrowDownLeft, ArrowUpRight, CheckCircle2, Plus } from "lucide-react";
 import { useFinance } from "@/components/finance-provider";
 import { PurchaseItemsEditor } from "@/components/purchase-items";
 import {
-  blankPurchaseItem,
+  transactionFormDefaults,
   createTransactionFormSchema,
   type TransactionFormInput,
 } from "@/lib/form-schemas";
@@ -42,19 +42,26 @@ import {
 } from "@/components/ui/native-select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
-export function TransactionForm() {
-  const { accounts, addTransactions } = useFinance();
+export function TransactionForm({
+  transaction: original,
+  onSaved,
+  onBusyChange,
+}: {
+  transaction?: TransactionDraft & { id: string };
+  onSaved?: () => void;
+  onBusyChange?: (pending: boolean) => void;
+} = {}) {
+  const {
+    accounts: allAccounts,
+    addTransactions,
+    updateTransaction,
+  } = useFinance();
+  const accounts = original
+    ? allAccounts.filter((account) => account.currency === original.currency)
+    : allAccounts;
+  const id = useId();
   const [success, setSuccess] = useState("");
-  const defaults: TransactionFormInput = {
-    type: "expense",
-    detailed: false,
-    name: "",
-    amount: "",
-    accountId: accounts[0]?.id ?? "",
-    category: "Makanan",
-    date: "2026-11-15",
-    purchase: { items: [blankPurchaseItem()], discount: 0 },
-  };
+  const defaults = transactionFormDefaults(accounts[0]?.id ?? "", original);
   const form = useForm<TransactionFormInput, unknown, TransactionDraft>({
     resolver: zodResolver(createTransactionFormSchema(accounts)),
     defaultValues: defaults,
@@ -82,13 +89,21 @@ export function TransactionForm() {
   const pending = form.formState.isSubmitting;
   async function submit(transaction: TransactionDraft) {
     setSuccess("");
+    onBusyChange?.(true);
     try {
-      await addTransactions([transaction]);
+      if (original) await updateTransaction(original.id, transaction);
+      else await addTransactions([transaction]);
     } catch (cause) {
       form.setError("root", {
         message:
           cause instanceof Error ? cause.message : "Gagal menyimpan transaksi.",
       });
+      return;
+    } finally {
+      onBusyChange?.(false);
+    }
+    if (original) {
+      onSaved?.();
       return;
     }
     setSuccess(
@@ -99,9 +114,13 @@ export function TransactionForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Tambah transaksi</CardTitle>
+        <CardTitle>
+          {original ? "Ubah transaksi" : "Tambah transaksi"}
+        </CardTitle>
         <CardDescription>
-          Saldo rekening diperbarui setelah transaksi disimpan.
+          {original
+            ? "Perubahan memperbarui saldo dan laporan. Rekening tujuan harus memakai mata uang yang sama. Pilih tanpa rincian untuk menghapus rincian barang."
+            : "Saldo rekening diperbarui setelah transaksi disimpan. Lampiran gambar dapat ditambahkan dari Detail transaksi setelah tersimpan."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -118,12 +137,14 @@ export function TransactionForm() {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel id="type-label">Jenis transaksi</FieldLabel>
+                      <FieldLabel id={`${id}-type-label`}>
+                        Jenis transaksi
+                      </FieldLabel>
                       <ToggleGroup
                         variant="outline"
                         value={[field.value]}
                         onBlur={field.onBlur}
-                        aria-labelledby="type-label"
+                        aria-labelledby={`${id}-type-label`}
                         onValueChange={(values) => {
                           const next = values[0];
                           if (next === "income" || next === "expense") {
@@ -159,12 +180,12 @@ export function TransactionForm() {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="transaction-name">
+                      <FieldLabel htmlFor={`${id}-transaction-name`}>
                         Nama transaksi
                       </FieldLabel>
                       <Input
                         {...field}
-                        id="transaction-name"
+                        id={`${id}-transaction-name`}
                         placeholder={
                           type === "income"
                             ? "Contoh: Gaji November"
@@ -183,12 +204,12 @@ export function TransactionForm() {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="transaction-amount">
+                      <FieldLabel htmlFor={`${id}-transaction-amount`}>
                         Nominal ({currency})
                       </FieldLabel>
                       <Input
                         {...field}
-                        id="transaction-amount"
+                        id={`${id}-transaction-amount`}
                         value={
                           detailed
                             ? Number.isFinite(total)
@@ -221,12 +242,12 @@ export function TransactionForm() {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="transaction-account">
+                      <FieldLabel htmlFor={`${id}-transaction-account`}>
                         Rekening atau dompet
                       </FieldLabel>
                       <NativeSelect
                         {...field}
-                        id="transaction-account"
+                        id={`${id}-transaction-account`}
                         disabled={!accounts.length}
                         aria-invalid={fieldState.invalid}
                       >
@@ -253,12 +274,12 @@ export function TransactionForm() {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="transaction-category">
+                      <FieldLabel htmlFor={`${id}-transaction-category`}>
                         Kategori
                       </FieldLabel>
                       <NativeSelect
                         {...field}
-                        id="transaction-category"
+                        id={`${id}-transaction-category`}
                         aria-invalid={fieldState.invalid}
                       >
                         {transactionCategories[type].map((category) => (
@@ -278,12 +299,12 @@ export function TransactionForm() {
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="transaction-date">
+                      <FieldLabel htmlFor={`${id}-transaction-date`}>
                         Tanggal transaksi
                       </FieldLabel>
                       <Input
                         {...field}
-                        id="transaction-date"
+                        id={`${id}-transaction-date`}
                         type="date"
                         aria-invalid={fieldState.invalid}
                       />
@@ -301,13 +322,13 @@ export function TransactionForm() {
                     control={form.control}
                     render={({ field }) => (
                       <Field>
-                        <FieldLabel id="detail-mode-label">
+                        <FieldLabel id={`${id}-detail-mode-label`}>
                           Rincian belanja (opsional)
                         </FieldLabel>
                         <ToggleGroup
                           value={[field.value ? "details" : "simple"]}
                           onBlur={field.onBlur}
-                          aria-labelledby="detail-mode-label"
+                          aria-labelledby={`${id}-detail-mode-label`}
                           variant="outline"
                           onValueChange={(values) => {
                             if (
@@ -370,10 +391,16 @@ export function TransactionForm() {
                 size="lg"
                 disabled={pending || !accounts.length}
               >
-                <Plus data-icon="inline-start" />
+                {original ? (
+                  <CheckCircle2 data-icon="inline-start" />
+                ) : (
+                  <Plus data-icon="inline-start" />
+                )}
                 {pending
                   ? "Menyimpan…"
-                  : `Simpan ${type === "income" ? "pemasukan" : "pengeluaran"}`}
+                  : original
+                    ? "Simpan perubahan"
+                    : `Simpan ${type === "income" ? "pemasukan" : "pengeluaran"}`}
               </Button>
             </FieldSet>
           </form>

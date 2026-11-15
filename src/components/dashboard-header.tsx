@@ -17,9 +17,11 @@ export function DashboardHeader() {
     ? "Rekening & dompet"
     : pathname === "/transactions"
       ? "Transaksi"
-      : pathname === "/analytics"
-        ? "Analisis"
-        : "Ringkasan";
+      : pathname === "/storage"
+        ? "Penyimpanan"
+        : pathname === "/analytics"
+          ? "Analisis"
+          : "Ringkasan";
   const account = isAccount
     ? accounts.find((account) => pathname === `/accounts/${account.id}`)
     : undefined;

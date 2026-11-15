@@ -43,3 +43,9 @@ Rata-rata pengeluaran dihitung per transaksi pengeluaran. Hari pengeluaran terti
 - Navigasi sidebar **Pola transaksi** menuju `/analytics#pola-transaksi`, menggantikan anggaran contoh.
 
 Pemeriksaan: `node --test --test-isolation=none src/lib/dashboard.test.ts`, `npm run lint`, `npx tsc --noEmit`, dan `npm run build`. Untuk pemeriksaan visual, gunakan tema terang/gelap dan viewport kecil; periksa pula rentang satu hari, periode tanpa pengeluaran, dan saldo negatif.
+
+## Detail transaksi
+
+`TransactionDetails` (`src/components/transaction-details.tsx`) menyediakan Dialog read-only yang sama untuk Transaksi, Ringkasan, Analisis, detail rekening, dan pratinjau impor JSON. Isinya mencakup nama, arah pemasukan/pengeluaran, nominal/mata uang, tanggal, kategori, rekening, ID, serta waktu pencatatan di aplikasi. Waktu pencatatan berasal dari `created_at` database dan berbeda dari tanggal transaksi, terutama untuk data hasil impor.
+
+`PurchaseDetailsContent` pada `purchase-items.tsx` menampilkan jumlah/harga barang, jenis, kelompok, diskon per baris, subtotal, diskon seluruh belanja, dan total akhir. Transaksi tanpa rincian memiliki keadaan kosong; aplikasi tidak menebak daftar barang. Pratinjau JSON diberi label belum disimpan dan tidak memiliki ID/waktu pencatatan. Saat nominal disembunyikan di Ringkasan/Analisis, pemicu detail juga disembunyikan.

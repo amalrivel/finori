@@ -12,6 +12,7 @@ import {
   ChartColumn,
   X,
   Wallet,
+  HardDrive,
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ const navigation = [
   { label: "Analisis", icon: ChartNoAxesCombined, href: "/analytics" },
   { label: "Transaksi", icon: ArrowLeftRight, href: "/transactions" },
   { label: "Rekening & dompet", icon: Wallet, href: "/accounts" },
+  { label: "Penyimpanan", icon: HardDrive, href: "/storage" },
 ];
 const overviewLinks = [
   { label: "Arus kas", icon: ChartNoAxesCombined, href: "/analytics#arus-kas" },
@@ -67,9 +69,11 @@ export function AppSidebar() {
     ? "/accounts"
     : pathname.startsWith("/transactions")
       ? "/transactions"
-      : pathname.startsWith("/analytics")
-        ? "/analytics"
-        : "/";
+      : pathname.startsWith("/storage")
+        ? "/storage"
+        : pathname.startsWith("/analytics")
+          ? "/analytics"
+          : "/";
 
   return (
     <Sidebar>

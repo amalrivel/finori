@@ -13,7 +13,7 @@ import {
   SearchX,
 } from "lucide-react";
 import { AccountActions } from "@/components/account-actions";
-import { PurchaseDetailsView } from "@/components/purchase-items";
+import { TransactionDetails } from "@/components/transaction-details";
 import { useFinance } from "@/components/finance-provider";
 import { accountSummary, currencySummary } from "@/lib/finance";
 import { Badge } from "@/components/ui/badge";
@@ -368,7 +368,7 @@ export function AccountDetails({ accountId }: { accountId: string }) {
                             <span className="font-medium">
                               {transaction.name}
                             </span>
-                            <PurchaseDetailsView transaction={transaction} />
+                            <TransactionDetails transaction={transaction} />
                           </div>
                         </div>
                       </TableCell>

@@ -7,6 +7,7 @@ import {
   createPurchaseDetailsSchema,
   purchaseItemSchema,
   type Account,
+  type TransactionDraft,
 } from "./finance.ts";
 
 const unsignedInput = z.union([
@@ -175,3 +176,24 @@ export const blankPurchaseItem = () => ({
   kind: "",
   group: "",
 });
+
+export function transactionFormDefaults(
+  accountId: string,
+  original?: TransactionDraft,
+): TransactionFormInput {
+  return {
+    type: original && original.amount > 0 ? "income" : "expense",
+    detailed: Boolean(original?.items?.length),
+    name: original?.name ?? "",
+    amount: original ? Math.abs(original.amount) : "",
+    accountId: original?.accountId ?? accountId,
+    category: original?.category ?? "Makanan",
+    date: original?.date ?? new Date().toLocaleDateString("sv-SE"),
+    purchase: {
+      items: original?.items?.map((item) => ({ ...item })) ?? [
+        blankPurchaseItem(),
+      ],
+      discount: original?.discount ?? 0,
+    },
+  };
+}

@@ -195,7 +195,7 @@ export function DashboardCharts({
           </ChartContainer>
         )}
       </CardContent>
-      <CardFooter className="text-xs text-muted-foreground">
+      <CardFooter className="mt-auto min-h-20 text-xs text-muted-foreground">
         {data.entries.length} transaksi · Arus kas bersih{" "}
         {money(data.totals.balance)}
       </CardFooter>
@@ -263,7 +263,7 @@ export function DashboardCharts({
               </ChartContainer>
             )}
           </CardContent>
-          <CardFooter className="flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
+          <CardFooter className="mt-auto flex min-h-20 flex-wrap justify-between gap-2 text-xs text-muted-foreground">
             <span>Awal rentang {money(data.initial)}</span>
             <span>Akhir rentang {money(data.closingBalance)}</span>
           </CardFooter>
@@ -317,7 +317,7 @@ export function DashboardCharts({
                       <ChartTooltipContent
                         formatter={(value, _name, item) => (
                           <div className="grid max-w-64 gap-1">
-                            <span className="font-medium break-words">
+                            <span className="font-medium wrap-break-word">
                               {item.payload.name}
                             </span>
                             <span>
@@ -341,7 +341,7 @@ export function DashboardCharts({
               </ChartContainer>
             )}
           </CardContent>
-          <CardFooter className="text-xs text-muted-foreground">
+          <CardFooter className="mt-auto min-h-20 text-xs text-muted-foreground">
             Berdasarkan nominal pengeluaran, bukan jumlah transaksi.{" "}
             {data.ranking.length} nama catatan berbeda.
           </CardFooter>
@@ -427,7 +427,7 @@ export function DashboardCharts({
               </ChartContainer>
             )}
           </CardContent>
-          <CardFooter className="text-xs text-muted-foreground">
+          <CardFooter className="mt-auto min-h-20 text-xs text-muted-foreground">
             Hanya rekening yang memiliki transaksi pada periode ini. Mata uang
             lain tidak digabung.
           </CardFooter>

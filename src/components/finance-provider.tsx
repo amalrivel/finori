@@ -15,14 +15,18 @@ import { AuthForm } from "@/components/auth-form";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
-type Transaction = TransactionDraft & { id: string; icon: LucideIcon };
+type Transaction = TransactionDraft & {
+  id: string;
+  createdAt: string;
+  icon: LucideIcon;
+};
 type Snapshot = {
   userId: string | null;
   accounts: Account[];
   transactions: Transaction[];
 };
 const withIcon = (
-  transaction: TransactionDraft & { id: string },
+  transaction: TransactionDraft & { id: string; createdAt: string },
 ): Transaction => ({
   ...transaction,
   icon: transaction.amount > 0 ? ArrowDownLeft : ArrowUpRight,
@@ -35,6 +39,11 @@ const FinanceContext = createContext<{
   saveAccount: (account: Account) => Promise<void>;
   deleteAccount: (id: string) => Promise<void>;
   addTransactions: (transactions: TransactionDraft[]) => Promise<void>;
+  updateTransaction: (
+    id: string,
+    transaction: TransactionDraft,
+  ) => Promise<void>;
+  deleteTransaction: (id: string) => Promise<void>;
   signOut: () => Promise<void>;
 } | null>(null);
 
@@ -205,6 +214,53 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     );
   }
 
+  async function updateTransaction(id: string, transaction: TransactionDraft) {
+    if (!userId) throw new Error("Silakan masuk kembali.");
+    const { data, error } = await supabase
+      .from("transactions")
+      .update(transactionToRow(transaction, userId))
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    const saved = withIcon(transactionFromRow(data));
+    setSnapshot((current) =>
+      current.userId === userId
+        ? {
+            ...current,
+            transactions: current.transactions.map((value) =>
+              value.id === id ? saved : value,
+            ),
+          }
+        : current,
+    );
+  }
+  async function deleteTransaction(id: string) {
+    if (!userId) throw new Error("Silakan masuk kembali.");
+    const { error } = await supabase
+      .from("transactions")
+      .delete()
+      .eq("id", id)
+      .select()
+      .single();
+    if (error)
+      throw new Error(
+        error.code === "23503"
+          ? "Hapus lampiran transaksi terlebih dahulu melalui bagian Lampiran agar file di Drive tetap terkelola."
+          : error.message,
+      );
+    setSnapshot((current) =>
+      current.userId === userId
+        ? {
+            ...current,
+            transactions: current.transactions.filter(
+              (value) => value.id !== id,
+            ),
+          }
+        : current,
+    );
+  }
+
   async function signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) throw new Error(error.message);
@@ -245,6 +301,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         saveAccount,
         deleteAccount,
         addTransactions,
+        updateTransaction,
+        deleteTransaction,
         signOut,
       }}
     >
